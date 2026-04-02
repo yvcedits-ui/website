@@ -1106,98 +1106,109 @@ section {
 <div class="toast" id="toast">Message sent! I'll reply within 24 hrs ✦</div>
 
 <script>
-/* ——————————————————————————————————————
-   NAV: scroll class + hamburger
-—————————————————————————————————————— */
-const navbar      = document.getElementById('navbar');
-const hamburger   = document.getElementById('hamburger');
-const mobileMenu  = document.getElementById('mobileMenu');
+/* Wrap in DOMContentLoaded to ensure elements exist before firing */
+document.addEventListener("DOMContentLoaded", function() {
+  
+  /* ——————————————————————————————————————
+     NAV: scroll class + hamburger
+  —————————————————————————————————————— */
+  const navbar      = document.getElementById('navbar');
+  const hamburger   = document.getElementById('hamburger');
+  const mobileMenu  = document.getElementById('mobileMenu');
 
-window.addEventListener('scroll', () => {
-  navbar.classList.toggle('scrolled', window.scrollY > 30);
-});
-
-hamburger.addEventListener('click', () => {
-  const open = hamburger.classList.toggle('open');
-  mobileMenu.classList.toggle('open', open);
-});
-
-function closeMobile() {
-  hamburger.classList.remove('open');
-  mobileMenu.classList.remove('open');
-}
-
-/* ——————————————————————————————————————
-   SCROLL REVEAL
-—————————————————————————————————————— */
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.classList.add('visible');
-      revealObserver.unobserve(e.target);
-    }
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 30);
   });
-}, { threshold: 0.12 });
 
-document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+  if(hamburger && mobileMenu) {
+    hamburger.addEventListener('click', () => {
+      const open = hamburger.classList.toggle('open');
+      mobileMenu.classList.toggle('open', open);
+    });
+  }
 
-/* ——————————————————————————————————————
-   BEFORE / AFTER SLIDER
-—————————————————————————————————————— */
-(function () {
+  /* ——————————————————————————————————————
+     SCROLL REVEAL
+  —————————————————————————————————————— */
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        revealObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  /* ——————————————————————————————————————
+     BEFORE / AFTER SLIDER
+  —————————————————————————————————————— */
   const wrapper    = document.getElementById('baSlider');
   const beforeWrap = document.getElementById('beforeWrap');
   const handle     = document.getElementById('sliderHandle');
 
-  let dragging  = false;
-  let startX    = 0;
-  let startPct  = 50;
-  let currentPct = 50;
+  if(wrapper && beforeWrap && handle) {
+    let dragging  = false;
+    let startX    = 0;
+    let startPct  = 50;
+    let currentPct = 50;
 
-  function setPosition(pct) {
-    pct = Math.min(97, Math.max(3, pct));
-    currentPct = pct;
-    beforeWrap.style.width = pct + '%';
-    handle.style.left      = pct + '%';
+    function setPosition(pct) {
+      pct = Math.min(97, Math.max(3, pct));
+      currentPct = pct;
+      beforeWrap.style.width = pct + '%';
+      handle.style.left      = pct + '%';
+    }
+
+    function getPct(clientX) {
+      const rect = wrapper.getBoundingClientRect();
+      return ((clientX - rect.left) / rect.width) * 100;
+    }
+
+    /* Mouse events */
+    wrapper.addEventListener('mousedown', (e) => {
+      dragging = true;
+      startX   = e.clientX;
+      startPct = currentPct;
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      setPosition(getPct(e.clientX));
+    });
+
+    window.addEventListener('mouseup', () => { dragging = false; });
+
+    /* Touch events */
+    wrapper.addEventListener('touchstart', (e) => {
+      dragging = true;
+      startX   = e.touches[0].clientX;
+      startPct = currentPct;
+    }, { passive: true });
+
+    wrapper.addEventListener('touchmove', (e) => {
+      if (!dragging) return;
+      setPosition(getPct(e.touches[0].clientX));
+    }, { passive: true });
+
+    wrapper.addEventListener('touchend', () => { dragging = false; });
+
+    /* Init */
+    setPosition(50);
   }
+});
 
-  function getPct(clientX) {
-    const rect = wrapper.getBoundingClientRect();
-    return ((clientX - rect.left) / rect.width) * 100;
+/* Mobile Menu Helper Function (Must be global to work with onclick attributes) */
+function closeMobile() {
+  const hamburger   = document.getElementById('hamburger');
+  const mobileMenu  = document.getElementById('mobileMenu');
+  if(hamburger && mobileMenu) {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
   }
-
-  /* Mouse events */
-  wrapper.addEventListener('mousedown', (e) => {
-    dragging = true;
-    startX   = e.clientX;
-    startPct = currentPct;
-    e.preventDefault();
-  });
-
-  window.addEventListener('mousemove', (e) => {
-    if (!dragging) return;
-    setPosition(getPct(e.clientX));
-  });
-
-  window.addEventListener('mouseup', () => { dragging = false; });
-
-  /* Touch events */
-  wrapper.addEventListener('touchstart', (e) => {
-    dragging = true;
-    startX   = e.touches[0].clientX;
-    startPct = currentPct;
-  }, { passive: true });
-
-  wrapper.addEventListener('touchmove', (e) => {
-    if (!dragging) return;
-    setPosition(getPct(e.touches[0].clientX));
-  }, { passive: true });
-
-  wrapper.addEventListener('touchend', () => { dragging = false; });
-
-  /* Init */
-  setPosition(50);
-})();
+}
 
 /* ——————————————————————————————————————
    CONTACT FORM — mailto fallback
@@ -1223,8 +1234,10 @@ function handleFormSubmit(e) {
 
 function showToast() {
   const toast = document.getElementById('toast');
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 4000);
+  if(toast) {
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+  }
 }
 </script>
 
