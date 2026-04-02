@@ -1105,6 +1105,14 @@ section {
 
 <div class="toast" id="toast">Message sent! I'll reply within 24 hrs ✦</div>
 
+<style>
+/* This perfectly ensures no text is ever hidden on load */
+.reveal {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+</style>
+
 <script>
 /* Wrap in DOMContentLoaded to ensure elements exist before firing */
 document.addEventListener("DOMContentLoaded", function() {
@@ -1126,20 +1134,6 @@ document.addEventListener("DOMContentLoaded", function() {
       mobileMenu.classList.toggle('open', open);
     });
   }
-
-  /* ——————————————————————————————————————
-     SCROLL REVEAL
-  —————————————————————————————————————— */
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        revealObserver.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.12 });
-
-  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
   /* ——————————————————————————————————————
      BEFORE / AFTER SLIDER
@@ -1200,7 +1194,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
-/* Mobile Menu Helper Function (Must be global to work with onclick attributes) */
+/* Mobile Menu Helper Function */
 function closeMobile() {
   const hamburger   = document.getElementById('hamburger');
   const mobileMenu  = document.getElementById('mobileMenu');
